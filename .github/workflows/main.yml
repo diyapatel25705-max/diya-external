@@ -1,32 +1,38 @@
 name: Upload Website
 
 on:
- push:
-   branches:
-     - main
+  push:
+    branches:
+      - main
 
 jobs:
- Deploy:
-   runs-on: ubuntu-latest
-   steps:
-     - name: Checkout
-       uses: actions/checkout@v2
+  Deploy:
+    runs-on: ubuntu-latest
 
-     - name: Setup node
-       uses: actions/setup-node@v2
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # optional but future-safe
 
-     - name: Install dependencies
-       run: npm install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-     - name: Build static file
-       run: npm run build
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20   # you can also use 22 or 24 later
 
-     - name: Configure AWS Credentials
-       uses: aws-actions/configure-aws-credentials@v1
-       with:
-         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         aws-region: us-east-1
+      - name: Install dependencies
+        run: npm install
 
-     - name: Deploy static site to S3 bucket
-       run: aws s3 sync ./build s3://diya-external
+      - name: Build static file
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy static site to S3 bucket
+        run: aws s3 sync ./build s3://diya-external
