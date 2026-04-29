@@ -9,22 +9,19 @@ jobs:
   Deploy:
     runs-on: ubuntu-latest
 
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # optional but future-safe
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20   # you can also use 22 or 24 later
+          node-version: 22   # safer + future-ready
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build static file
+      - name: Build project
         run: npm run build
 
       - name: Configure AWS Credentials
@@ -34,5 +31,5 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy static site to S3 bucket
-        run: aws s3 sync ./build s3://diya-external
+      - name: Deploy to S3
+        run: aws s3 sync ./build s3://diya-external --delete
